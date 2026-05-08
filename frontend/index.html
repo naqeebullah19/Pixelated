@@ -113,7 +113,6 @@ tailwind.config = {
 </head>
 <body class="bg-background text-on-background h-screen overflow-hidden flex flex-col font-ui-medium text-ui-medium selection:bg-primary-container selection:text-on-primary-container">
 
-<!-- ===== TOAST ===== -->
 <div id="toast" class="toast opacity-0 pointer-events-none">
   <div class="bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-xl text-ui-medium shadow-lg flex items-center gap-2">
     <span id="toast-icon" class="material-symbols-outlined text-[16px]">info</span>
@@ -121,9 +120,7 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== LANDING SCREEN ===== -->
 <div id="landing" class="flex-col h-full w-full">
-  <!-- TopNav -->
   <nav class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
     <div class="flex items-center gap-3">
       <span class="font-bold text-[15px] text-primary font-heading-sm">Pixelated</span>
@@ -142,10 +139,8 @@ tailwind.config = {
     </div>
   </nav>
 
-  <!-- Landing body -->
   <div class="flex-1 flex items-center justify-center bg-surface-container-low" style="height:calc(100vh - 48px)">
     <div class="flex flex-col items-center gap-8 w-full max-w-2xl px-6">
-      <!-- Drop zone -->
       <div id="drop-zone"
         class="w-full border-2 border-dashed border-outline-variant rounded-xl p-16 flex flex-col items-center gap-4 cursor-pointer transition-all hover:border-primary hover:bg-surface-container"
         onclick="document.getElementById('file-input').click()"
@@ -162,7 +157,6 @@ tailwind.config = {
         </button>
       </div>
 
-      <!-- Supported operations preview -->
       <div class="w-full">
         <p class="font-editor-label text-editor-label text-on-surface-variant uppercase mb-3">Available Operations</p>
         <div class="grid grid-cols-4 gap-2">
@@ -192,9 +186,7 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== EDITOR SCREEN ===== -->
 <div id="editor" class="flex-col h-full w-full">
-  <!-- TopNav -->
   <header class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
     <div class="flex items-center gap-4">
       <button onclick="goToLanding()" class="font-bold text-[15px] text-primary font-heading-sm hover:opacity-70 transition-opacity">PixelForge</button>
@@ -222,7 +214,6 @@ tailwind.config = {
   </header>
 
   <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px - 60px)">
-    <!-- Left rail tools -->
     <aside class="bg-surface-container-lowest border-r border-outline-variant flex flex-col items-center py-3 gap-element-gap z-40 shrink-0 w-[48px]">
       <button onclick="setPanel('color')" id="tool-color" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Color">
         <span class="material-symbols-outlined text-[20px]">palette</span>
@@ -246,10 +237,8 @@ tailwind.config = {
       </div>
     </aside>
 
-    <!-- Center canvas -->
     <main class="flex-1 bg-canvas-dark relative flex flex-col overflow-hidden">
       <div class="flex-1 p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
-        <!-- Loading overlay -->
         <div id="processing-overlay" class="absolute inset-0 bg-canvas-dark/70 z-10 flex items-center justify-center" style="display:none!important">
           <div class="bg-surface-container-lowest rounded-xl px-6 py-4 flex items-center gap-3 shadow-xl border border-outline-variant">
             <svg class="loading-spinner w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24">
@@ -260,16 +249,13 @@ tailwind.config = {
           </div>
         </div>
 
-        <!-- Image display -->
         <div id="image-wrapper" class="relative max-w-4xl max-h-full shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20" style="max-width:min(800px,100%);max-height:calc(100vh - 200px)">
           <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height:calc(100vh - 200px);object-fit:contain"/>
-          <!-- Compare overlay (before image) -->
           <div id="compare-overlay" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path:inset(0 50% 0 0);display:none">
             <img id="compare-img" src="" alt="Original" class="w-full h-full object-contain"/>
             <div class="absolute top-2 left-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase">Before</div>
           </div>
           <div id="compare-label-after" class="absolute top-2 right-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase" style="display:none">After</div>
-          <!-- Compare drag handle -->
           <div id="compare-handle" class="compare-slider" style="left:50%;display:none" onmousedown="startCompareDrag(event)">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-lg pointer-events-none">
               <span class="material-symbols-outlined text-white text-[14px]">drag_indicator</span>
@@ -278,7 +264,6 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Zoom / compare bar -->
       <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-4 py-2 flex items-center gap-4 shadow-lg z-10">
         <div class="flex items-center gap-2 text-secondary">
           <button onclick="zoom(-10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">remove</span></button>
@@ -294,9 +279,7 @@ tailwind.config = {
       </div>
     </main>
 
-    <!-- Right controls panel -->
     <aside id="right-panel" class="bg-surface-container-lowest border-l border-outline-variant flex flex-col shrink-0 w-[280px] h-full overflow-hidden">
-      <!-- Panel header -->
       <div class="px-3 py-3 border-b border-outline-variant flex justify-between items-center bg-surface-bright shrink-0">
         <span id="panel-title" class="font-ui-bold text-ui-bold text-on-surface">Filters</span>
         <div class="flex gap-1">
@@ -307,12 +290,9 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- Panel content - scrollable -->
       <div id="panel-content" class="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
-        <!-- Dynamically rendered -->
-      </div>
+        </div>
 
-      <!-- Apply / Reset footer -->
       <div class="p-3 border-t border-outline-variant bg-surface-bright flex gap-2 shrink-0">
         <button onclick="resetParams()" class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium py-1.5 rounded hover:bg-surface-container-low transition-colors text-center text-ui-medium">Reset</button>
         <button onclick="applyOperation()" id="apply-btn" class="flex-1 bg-primary text-on-primary font-ui-medium py-1.5 rounded hover:opacity-90 transition-opacity text-center text-ui-medium flex items-center justify-center gap-1.5">
@@ -322,7 +302,6 @@ tailwind.config = {
     </aside>
   </div>
 
-  <!-- Bottom history tray -->
   <div class="h-[60px] bg-surface-container-lowest border-t border-outline-variant shrink-0 flex items-center px-4 overflow-x-auto gap-1" id="history-tray">
     <div class="flex items-center gap-1 min-w-max" id="history-list">
       <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary-container/10">
@@ -333,7 +312,6 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== EXPORT MODAL ===== -->
 <div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm" style="display:none!important">
   <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-[480px] max-w-full mx-4 overflow-hidden">
     <div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center">
@@ -343,7 +321,6 @@ tailwind.config = {
       </button>
     </div>
     <div class="p-4 flex flex-col gap-4">
-      <!-- Format selector -->
       <div class="flex flex-col gap-2">
         <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Format</label>
         <div class="flex gap-2">
@@ -352,7 +329,6 @@ tailwind.config = {
           <button onclick="setFormat('webp')" id="fmt-webp" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-ui-medium transition-all hover:border-primary hover:text-primary">WEBP</button>
         </div>
       </div>
-      <!-- Quality (for jpeg/webp) -->
       <div id="quality-section" class="flex flex-col gap-2" style="display:none!important">
         <div class="flex justify-between items-center">
           <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Quality</label>
@@ -360,12 +336,10 @@ tailwind.config = {
         </div>
         <div class="slider-track"><input type="range" id="quality-slider" min="1" max="100" value="92" oninput="document.getElementById('quality-val').value=this.value"/></div>
       </div>
-      <!-- Filename -->
       <div class="flex flex-col gap-2">
         <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Filename</label>
         <input id="export-filename" type="text" value="pixelforge-export" class="w-full h-8 px-3 border border-outline-variant rounded bg-surface-container-lowest font-ui-medium text-ui-medium text-on-surface focus:outline-none focus:border-primary"/>
       </div>
-      <!-- Preview info -->
       <div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-3">
         <span class="material-symbols-outlined text-[20px] text-secondary">info</span>
         <div>
@@ -383,11 +357,10 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- Hidden file input -->
 <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)"/>
 
 <script>
-const API = 'http://localhost:8000';
+const API = '/api';
 let originalFile = null;
 let originalDataUrl = null;
 let currentDataUrl = null;
