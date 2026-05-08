@@ -25,15 +25,15 @@ def load_image(file: UploadFile) -> Image.Image:
     contents = file.file.read()
     return Image.open(io.BytesIO(contents)).convert("RGBA")
 
-@app.get("/")
+@app.get("/api/")
 def root():
     return {"status": "ok", "service": "PixelForge API"}
 
-@app.get("/health")
+@app.get("/api/health")
 def health():
     return {"status": "healthy"}
 
-@app.get("/operations")
+@app.get("/api/operations")
 def operations():
     return {
         "operations": [
@@ -55,7 +55,7 @@ def operations():
         ]
     }
 
-@app.post("/process/grayscale")
+@app.post("/api/process/grayscale")
 async def grayscale(file: UploadFile = File(...)):
     img = load_image(file)
     r, g, b, a = img.split()
@@ -63,34 +63,34 @@ async def grayscale(file: UploadFile = File(...)):
     gray_rgba = Image.merge("RGBA", (gray, gray, gray, a))
     return {"result": image_to_base64(gray_rgba), "operation": "grayscale"}
 
-@app.post("/process/blur")
+@app.post("/api/process/blur")
 async def blur(file: UploadFile = File(...), radius: float = Form(2.0)):
     img = load_image(file)
     blurred = img.filter(ImageFilter.GaussianBlur(radius=radius))
     return {"result": image_to_base64(blurred), "operation": "blur", "radius": radius}
 
-@app.post("/process/sharpen")
+@app.post("/api/process/sharpen")
 async def sharpen(file: UploadFile = File(...), factor: float = Form(2.0)):
     img = load_image(file)
     enhancer = ImageEnhance.Sharpness(img)
     sharpened = enhancer.enhance(factor)
     return {"result": image_to_base64(sharpened), "operation": "sharpen", "factor": factor}
 
-@app.post("/process/brightness")
+@app.post("/api/process/brightness")
 async def brightness(file: UploadFile = File(...), factor: float = Form(1.0)):
     img = load_image(file)
     enhancer = ImageEnhance.Brightness(img)
     result = enhancer.enhance(factor)
     return {"result": image_to_base64(result), "operation": "brightness", "factor": factor}
 
-@app.post("/process/contrast")
+@app.post("/api/process/contrast")
 async def contrast(file: UploadFile = File(...), factor: float = Form(1.0)):
     img = load_image(file)
     enhancer = ImageEnhance.Contrast(img)
     result = enhancer.enhance(factor)
     return {"result": image_to_base64(result), "operation": "contrast", "factor": factor}
 
-@app.post("/process/saturation")
+@app.post("/api/process/saturation")
 async def saturation(file: UploadFile = File(...), factor: float = Form(1.0)):
     img = load_image(file)
     rgb = img.convert("RGB")
@@ -101,7 +101,7 @@ async def saturation(file: UploadFile = File(...), factor: float = Form(1.0)):
     result = Image.merge("RGBA", (r, g, b, a))
     return {"result": image_to_base64(result), "operation": "saturation", "factor": factor}
 
-@app.post("/process/invert")
+@app.post("/api/process/invert")
 async def invert(file: UploadFile = File(...)):
     img = load_image(file)
     r, g, b, a = img.split()
@@ -111,7 +111,7 @@ async def invert(file: UploadFile = File(...)):
     result = Image.merge("RGBA", (ir, ig, ib, a))
     return {"result": image_to_base64(result), "operation": "invert"}
 
-@app.post("/process/sepia")
+@app.post("/api/process/sepia")
 async def sepia(file: UploadFile = File(...)):
     img = load_image(file)
     r, g, b, a = img.split()
@@ -122,13 +122,13 @@ async def sepia(file: UploadFile = File(...)):
     result = Image.merge("RGBA", (sepia_r, sepia_g, sepia_b, a))
     return {"result": image_to_base64(result), "operation": "sepia"}
 
-@app.post("/process/rotate")
+@app.post("/api/process/rotate")
 async def rotate(file: UploadFile = File(...), angle: float = Form(90.0)):
     img = load_image(file)
     result = img.rotate(-angle, expand=True)
     return {"result": image_to_base64(result), "operation": "rotate", "angle": angle}
 
-@app.post("/process/flip")
+@app.post("/api/process/flip")
 async def flip(file: UploadFile = File(...), direction: str = Form("horizontal")):
     img = load_image(file)
     if direction == "horizontal":
@@ -137,7 +137,7 @@ async def flip(file: UploadFile = File(...), direction: str = Form("horizontal")
         result = ImageOps.flip(img)
     return {"result": image_to_base64(result), "operation": "flip", "direction": direction}
 
-@app.post("/process/edge-detect")
+@app.post("/api/process/edge-detect")
 async def edge_detect(file: UploadFile = File(...)):
     img = load_image(file)
     r, g, b, a = img.split()
@@ -147,7 +147,7 @@ async def edge_detect(file: UploadFile = File(...)):
     result = Image.merge("RGBA", (er, eg, eb, a))
     return {"result": image_to_base64(result), "operation": "edge-detect"}
 
-@app.post("/process/emboss")
+@app.post("/api/process/emboss")
 async def emboss(file: UploadFile = File(...)):
     img = load_image(file)
     r, g, b, a = img.split()
@@ -157,7 +157,7 @@ async def emboss(file: UploadFile = File(...)):
     result = Image.merge("RGBA", (er, eg, eb, a))
     return {"result": image_to_base64(result), "operation": "emboss"}
 
-@app.post("/process/pixelate")
+@app.post("/api/process/pixelate")
 async def pixelate(file: UploadFile = File(...), block_size: int = Form(10)):
     img = load_image(file)
     w, h = img.size
@@ -166,13 +166,13 @@ async def pixelate(file: UploadFile = File(...), block_size: int = Form(10)):
     result = small.resize((w, h), Image.NEAREST)
     return {"result": image_to_base64(result), "operation": "pixelate", "block_size": block_size}
 
-@app.post("/process/resize")
+@app.post("/api/process/resize")
 async def resize(file: UploadFile = File(...), width: int = Form(800), height: int = Form(600)):
     img = load_image(file)
     result = img.resize((width, height), Image.LANCZOS)
     return {"result": image_to_base64(result), "operation": "resize", "width": width, "height": height}
 
-@app.post("/process/crop")
+@app.post("/api/process/crop")
 async def crop(file: UploadFile = File(...), left: int = Form(0), top: int = Form(0), right: int = Form(100), bottom: int = Form(100)):
     img = load_image(file)
     w, h = img.size

@@ -360,7 +360,10 @@ tailwind.config = {
 <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)"/>
 
 <script>
-const API = '/api';
+// Automatically use localhost for local testing, and relative /api for Vercel
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+  ? 'http://localhost:8000/api' 
+  : '/api';
 let originalFile = null;
 let originalDataUrl = null;
 let currentDataUrl = null;
