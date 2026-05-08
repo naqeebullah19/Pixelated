@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pixelated Digital Image Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-lowest": "#ffffff",
+        "secondary": "#515f74",
+        "surface-container-high": "#eae6f1",
+        "surface-dim": "#dcd8e3",
+        "surface-variant": "#e4e1eb",
+        "surface-container-low": "#f6f2fc",
+        "background": "#fcf8ff",
+        "surface-container": "#f0ecf6",
+        "on-primary": "#ffffff",
+        "outline": "#777584",
+        "surface-bright": "#fcf8ff",
+        "surface-tint": "#544fc0",
+        "secondary-container": "#d5e3fc",
+        "primary-fixed": "#e2dfff",
+        "error-container": "#ffdad6",
+        "primary-fixed-dim": "#c3c0ff",
+        "outline-variant": "#c8c4d5",
+        "inverse-surface": "#303037",
+        "inverse-on-surface": "#f3eff9",
+        "on-error": "#ffffff",
+        "inverse-primary": "#c3c0ff",
+        "primary-container": "#3730a3",
+        "on-primary-container": "#a9a7ff",
+        "surface-container-highest": "#e4e1eb",
+        "on-surface": "#1b1b22",
+        "on-surface-variant": "#464553",
+        "surface": "#fcf8ff",
+        "on-primary-fixed": "#0f0069",
+        "error": "#ba1a1a",
+        "primary": "#1f108e",
+        "on-background": "#1b1b22",
+        "canvas-dark": "#1C1C19"
+      },
+      borderRadius: {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      spacing: {
+        "sidebar-width": "280px",
+        "panel-padding": "12px",
+        "toolbar-width": "48px",
+        "element-gap": "8px"
+      },
+      fontFamily: {
+        "editor-label": ["Inter"],
+        "ui-bold": ["Inter"],
+        "numeric-input": ["Space Grotesk"],
+        "heading-sm": ["Inter"],
+        "ui-medium": ["Inter"]
+      },
+      fontSize: {
+        "editor-label": ["11px", {"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}],
+        "ui-bold": ["13px", {"lineHeight":"18px","fontWeight":"600"}],
+        "numeric-input": ["12px", {"lineHeight":"16px","fontWeight":"500"}],
+        "heading-sm": ["14px", {"lineHeight":"20px","fontWeight":"600"}],
+        "ui-medium": ["13px", {"lineHeight":"18px","fontWeight":"400"}]
+      }
+    }
+  }
+}
+</script>
+<style>
+  .checkerboard {
+    background-color: #2a2a2a;
+    background-image: repeating-linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%,#333),
+      repeating-linear-gradient(45deg,#333 25%,#2a2a2a 25%,#2a2a2a 75%,#333 75%,#333);
+    background-position: 0 0,10px 10px;
+    background-size: 20px 20px;
+  }
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#c8c4d5; border-radius:4px; }
+  ::-webkit-scrollbar-thumb:hover { background:#777584; }
+  .slider-track { position:relative; height:24px; display:flex; align-items:center; cursor:pointer; }
+  .slider-track input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:2px; background:transparent; outline:none; cursor:pointer; position:relative; z-index:2; }
+  .slider-track input[type=range]::-webkit-slider-runnable-track { height:2px; background:#e4e1eb; border-radius:2px; }
+  .slider-track input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:12px; height:12px; background:#fff; border:2px solid #1f108e; border-radius:50%; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .slider-track input[type=range]::-moz-range-thumb { width:12px; height:12px; background:#fff; border:2px solid #1f108e; border-radius:50%; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  #landing { display:flex; }
+  #editor { display:none; }
+  #export-modal { display:none; }
+  #compare-overlay { display:none; }
+  .op-btn.active { background:rgba(31,16,142,0.08); border-color:rgba(31,16,142,0.3); color:#1f108e; }
+  .op-btn.active .op-icon { background:rgba(31,16,142,0.12); color:#1f108e; }
+  .history-item { transition: all 0.15s; }
+  .history-item:last-child .arrow { display:none; }
+  .loading-spinner { animation: spin 0.8s linear infinite; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9999; transition:all 0.3s; }
+  .drag-over { border-color:#1f108e !important; background:rgba(31,16,142,0.04) !important; }
+  .compare-slider { position:absolute; top:0; bottom:0; width:3px; background:#1f108e; cursor:ew-resize; z-index:20; transform:translateX(-50%); }
+  .compare-slider::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:32px; height:32px; background:#1f108e; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .tab-btn { transition:all 0.15s; }
+  .tab-btn.active { background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body class="bg-background text-on-background h-screen overflow-hidden flex flex-col font-ui-medium text-ui-medium selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast opacity-0 pointer-events-none">
+  <div class="bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-xl text-ui-medium shadow-lg flex items-center gap-2">
+    <span id="toast-icon" class="material-symbols-outlined text-[16px]">info</span>
+    <span id="toast-msg">Message</span>
+  </div>
+</div>
+
+<!-- ===== LANDING SCREEN ===== -->
+<div id="landing" class="flex-col h-full w-full">
+  <!-- TopNav -->
+  <nav class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
+    <div class="flex items-center gap-3">
+      <span class="font-bold text-[15px] text-primary font-heading-sm">Pixelated</span>
+      <span class="text-outline-variant">|</span>
+      <span class="text-secondary text-ui-medium">Digital Image Studio</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="api-status-landing" class="flex items-center gap-1.5 text-secondary text-ui-medium">
+        <div id="status-dot-landing" class="w-2 h-2 rounded-full bg-outline-variant"></div>
+        <span id="status-text-landing" class="font-numeric-input text-[11px]">Checking API...</span>
+      </div>
+      <div class="h-4 w-px bg-outline-variant mx-1"></div>
+      <button onclick="document.getElementById('file-input').click()" class="bg-primary text-on-primary font-ui-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity text-ui-medium flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">upload</span> Open Image
+      </button>
+    </div>
+  </nav>
+
+  <!-- Landing body -->
+  <div class="flex-1 flex items-center justify-center bg-surface-container-low" style="height:calc(100vh - 48px)">
+    <div class="flex flex-col items-center gap-8 w-full max-w-2xl px-6">
+      <!-- Drop zone -->
+      <div id="drop-zone"
+        class="w-full border-2 border-dashed border-outline-variant rounded-xl p-16 flex flex-col items-center gap-4 cursor-pointer transition-all hover:border-primary hover:bg-surface-container"
+        onclick="document.getElementById('file-input').click()"
+        ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <div class="w-16 h-16 bg-surface-container rounded-xl flex items-center justify-center border border-outline-variant">
+          <span class="material-symbols-outlined text-[32px] text-secondary">image</span>
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-[15px] text-on-surface font-heading-sm">Drop an image here</p>
+          <p class="text-secondary text-ui-medium mt-1">or click to browse — PNG, JPG, WEBP, GIF supported</p>
+        </div>
+        <button class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-4 py-2 rounded hover:bg-surface-container-low transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">folder_open</span> Browse Files
+        </button>
+      </div>
+
+      <!-- Supported operations preview -->
+      <div class="w-full">
+        <p class="font-editor-label text-editor-label text-on-surface-variant uppercase mb-3">Available Operations</p>
+        <div class="grid grid-cols-4 gap-2">
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex flex-col gap-1">
+            <span class="material-symbols-outlined text-[18px] text-primary">palette</span>
+            <span class="font-ui-bold text-ui-bold text-on-surface">Color</span>
+            <span class="text-[11px] text-secondary">Grayscale, Sepia, Invert</span>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex flex-col gap-1">
+            <span class="material-symbols-outlined text-[18px] text-primary">tune</span>
+            <span class="font-ui-bold text-ui-bold text-on-surface">Adjust</span>
+            <span class="text-[11px] text-secondary">Brightness, Contrast, Saturation</span>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex flex-col gap-1">
+            <span class="material-symbols-outlined text-[18px] text-primary">filter_vintage</span>
+            <span class="font-ui-bold text-ui-bold text-on-surface">Filters</span>
+            <span class="text-[11px] text-secondary">Blur, Sharpen, Emboss, Edge</span>
+          </div>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex flex-col gap-1">
+            <span class="material-symbols-outlined text-[18px] text-primary">crop_free</span>
+            <span class="font-ui-bold text-ui-bold text-on-surface">Transform</span>
+            <span class="text-[11px] text-secondary">Rotate, Flip, Resize, Crop</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDITOR SCREEN ===== -->
+<div id="editor" class="flex-col h-full w-full">
+  <!-- TopNav -->
+  <header class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
+    <div class="flex items-center gap-4">
+      <button onclick="goToLanding()" class="font-bold text-[15px] text-primary font-heading-sm hover:opacity-70 transition-opacity">PixelForge</button>
+      <div class="h-4 w-px bg-outline-variant"></div>
+      <div class="flex items-center gap-1.5 text-secondary text-ui-medium">
+        <span class="material-symbols-outlined text-[14px]">image</span>
+        <span id="filename-display">Untitled</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-secondary text-ui-medium">
+        <div id="status-dot-editor" class="w-2 h-2 rounded-full bg-outline-variant"></div>
+        <span id="status-text-editor" class="font-numeric-input text-[11px]">API: Checking...</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="undoLast()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-3 py-1 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5" title="Undo last operation">
+        <span class="material-symbols-outlined text-[16px]">undo</span> Undo
+      </button>
+      <button onclick="resetImage()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-3 py-1 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
+      </button>
+      <button onclick="openExport()" class="bg-primary text-on-primary font-ui-medium px-3 py-1 rounded hover:opacity-90 transition-opacity flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">download</span> Export
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px - 60px)">
+    <!-- Left rail tools -->
+    <aside class="bg-surface-container-lowest border-r border-outline-variant flex flex-col items-center py-3 gap-element-gap z-40 shrink-0 w-[48px]">
+      <button onclick="setPanel('color')" id="tool-color" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Color">
+        <span class="material-symbols-outlined text-[20px]">palette</span>
+      </button>
+      <button onclick="setPanel('adjust')" id="tool-adjust" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Adjustments">
+        <span class="material-symbols-outlined text-[20px]">tune</span>
+      </button>
+      <button onclick="setPanel('filter')" id="tool-filter" class="tool-rail-btn bg-primary-container text-on-primary-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Filters">
+        <span class="material-symbols-outlined text-[20px]">filter_vintage</span>
+      </button>
+      <button onclick="setPanel('transform')" id="tool-transform" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Transform">
+        <span class="material-symbols-outlined text-[20px]">crop_free</span>
+      </button>
+      <div class="mt-auto flex flex-col gap-element-gap">
+        <button onclick="toggleCompare()" class="text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Compare Before/After">
+          <span class="material-symbols-outlined text-[20px]">compare</span>
+        </button>
+        <button onclick="document.getElementById('file-input').click()" class="text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Open new image">
+          <span class="material-symbols-outlined text-[20px]">upload_file</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Center canvas -->
+    <main class="flex-1 bg-canvas-dark relative flex flex-col overflow-hidden">
+      <div class="flex-1 p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
+        <!-- Loading overlay -->
+        <div id="processing-overlay" class="absolute inset-0 bg-canvas-dark/70 z-10 flex items-center justify-center" style="display:none!important">
+          <div class="bg-surface-container-lowest rounded-xl px-6 py-4 flex items-center gap-3 shadow-xl border border-outline-variant">
+            <svg class="loading-spinner w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span class="font-ui-bold text-ui-bold text-on-surface">Processing...</span>
+          </div>
+        </div>
+
+        <!-- Image display -->
+        <div id="image-wrapper" class="relative max-w-4xl max-h-full shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20" style="max-width:min(800px,100%);max-height:calc(100vh - 200px)">
+          <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height:calc(100vh - 200px);object-fit:contain"/>
+          <!-- Compare overlay (before image) -->
+          <div id="compare-overlay" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path:inset(0 50% 0 0);display:none">
+            <img id="compare-img" src="" alt="Original" class="w-full h-full object-contain"/>
+            <div class="absolute top-2 left-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase">Before</div>
+          </div>
+          <div id="compare-label-after" class="absolute top-2 right-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase" style="display:none">After</div>
+          <!-- Compare drag handle -->
+          <div id="compare-handle" class="compare-slider" style="left:50%;display:none" onmousedown="startCompareDrag(event)">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-lg pointer-events-none">
+              <span class="material-symbols-outlined text-white text-[14px]">drag_indicator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zoom / compare bar -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-4 py-2 flex items-center gap-4 shadow-lg z-10">
+        <div class="flex items-center gap-2 text-secondary">
+          <button onclick="zoom(-10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+          <span id="zoom-display" class="font-numeric-input text-numeric-input text-on-surface w-12 text-center">100%</span>
+          <button onclick="zoom(10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">add</span></button>
+        </div>
+        <div class="w-px h-4 bg-outline-variant"></div>
+        <button onclick="toggleCompare()" id="compare-btn" class="flex items-center gap-2 text-secondary hover:text-primary transition-colors font-ui-bold text-ui-bold">
+          <span class="material-symbols-outlined text-[18px]">compare</span> Before / After
+        </button>
+        <div class="w-px h-4 bg-outline-variant"></div>
+        <span id="img-dimensions" class="font-numeric-input text-[11px] text-secondary">--</span>
+      </div>
+    </main>
+
+    <!-- Right controls panel -->
+    <aside id="right-panel" class="bg-surface-container-lowest border-l border-outline-variant flex flex-col shrink-0 w-[280px] h-full overflow-hidden">
+      <!-- Panel header -->
+      <div class="px-3 py-3 border-b border-outline-variant flex justify-between items-center bg-surface-bright shrink-0">
+        <span id="panel-title" class="font-ui-bold text-ui-bold text-on-surface">Filters</span>
+        <div class="flex gap-1">
+          <button id="btn-color-tab" onclick="setPanel('color')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Color</button>
+          <button id="btn-adjust-tab" onclick="setPanel('adjust')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Adjust</button>
+          <button id="btn-filter-tab" onclick="setPanel('filter')" class="tab-btn active px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Filter</button>
+          <button id="btn-transform-tab" onclick="setPanel('transform')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Transform</button>
+        </div>
+      </div>
+
+      <!-- Panel content - scrollable -->
+      <div id="panel-content" class="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- Apply / Reset footer -->
+      <div class="p-3 border-t border-outline-variant bg-surface-bright flex gap-2 shrink-0">
+        <button onclick="resetParams()" class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium py-1.5 rounded hover:bg-surface-container-low transition-colors text-center text-ui-medium">Reset</button>
+        <button onclick="applyOperation()" id="apply-btn" class="flex-1 bg-primary text-on-primary font-ui-medium py-1.5 rounded hover:opacity-90 transition-opacity text-center text-ui-medium flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-[14px]">check</span> Apply
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Bottom history tray -->
+  <div class="h-[60px] bg-surface-container-lowest border-t border-outline-variant shrink-0 flex items-center px-4 overflow-x-auto gap-1" id="history-tray">
+    <div class="flex items-center gap-1 min-w-max" id="history-list">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary-container/10">
+        <span class="material-symbols-outlined text-[16px] text-primary">image</span>
+        <span class="font-editor-label text-editor-label text-primary">Original</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXPORT MODAL ===== -->
+<div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm" style="display:none!important">
+  <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-[480px] max-w-full mx-4 overflow-hidden">
+    <div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center">
+      <span class="font-ui-bold text-ui-bold text-on-surface font-heading-sm">Export Image</span>
+      <button onclick="closeExport()" class="text-secondary hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    <div class="p-4 flex flex-col gap-4">
+      <!-- Format selector -->
+      <div class="flex flex-col gap-2">
+        <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Format</label>
+        <div class="flex gap-2">
+          <button onclick="setFormat('png')" id="fmt-png" class="fmt-btn flex-1 border border-primary bg-primary/5 text-primary font-ui-bold py-2 rounded text-ui-bold transition-all">PNG</button>
+          <button onclick="setFormat('jpeg')" id="fmt-jpeg" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-ui-medium transition-all hover:border-primary hover:text-primary">JPEG</button>
+          <button onclick="setFormat('webp')" id="fmt-webp" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-ui-medium transition-all hover:border-primary hover:text-primary">WEBP</button>
+        </div>
+      </div>
+      <!-- Quality (for jpeg/webp) -->
+      <div id="quality-section" class="flex flex-col gap-2" style="display:none!important">
+        <div class="flex justify-between items-center">
+          <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Quality</label>
+          <input id="quality-val" type="number" value="92" min="1" max="100" class="w-16 h-6 px-1.5 border border-outline-variant rounded bg-surface-container-lowest font-numeric-input text-numeric-input text-right text-on-surface focus:outline-none focus:border-primary"/>
+        </div>
+        <div class="slider-track"><input type="range" id="quality-slider" min="1" max="100" value="92" oninput="document.getElementById('quality-val').value=this.value"/></div>
+      </div>
+      <!-- Filename -->
+      <div class="flex flex-col gap-2">
+        <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Filename</label>
+        <input id="export-filename" type="text" value="pixelforge-export" class="w-full h-8 px-3 border border-outline-variant rounded bg-surface-container-lowest font-ui-medium text-ui-medium text-on-surface focus:outline-none focus:border-primary"/>
+      </div>
+      <!-- Preview info -->
+      <div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-3">
+        <span class="material-symbols-outlined text-[20px] text-secondary">info</span>
+        <div>
+          <p class="font-ui-bold text-ui-bold text-on-surface" id="export-size-info">—</p>
+          <p class="text-secondary text-[11px]" id="export-ops-info">0 operations applied</p>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pb-4 flex gap-2">
+      <button onclick="closeExport()" class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium py-2 rounded hover:bg-surface-container-low transition-colors">Cancel</button>
+      <button onclick="downloadImage()" class="flex-1 bg-primary text-on-primary font-ui-medium py-2 rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">download</span> Download
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)"/>
+
+<script>
+const API = 'http://localhost:8000';
+let originalFile = null;
+let originalDataUrl = null;
+let currentDataUrl = null;
+let historyStack = []; // array of {label, icon, dataUrl}
+let currentZoom = 100;
+let compareModeActive = false;
+let selectedOp = null;
+let currentParams = {};
+let exportFormat = 'png';
+
+// ---- PANELS DEFINITION ----
+const PANELS = {
+  color: {
+    title: 'Color',
+    ops: [
+      { id: 'grayscale', name: 'Grayscale', icon: 'filter_b_and_w', params: [] },
+      { id: 'sepia', name: 'Sepia Tone', icon: 'photo_filter', params: [] },
+      { id: 'invert', name: 'Invert Colors', icon: 'invert_colors', params: [] },
+    ]
+  },
+  adjust: {
+    title: 'Adjustments',
+    ops: [
+      { id: 'brightness', name: 'Brightness', icon: 'brightness_6', params: [{ name:'factor', label:'Factor', type:'range', min:0.1, max:3, step:0.05, default:1.0 }] },
+      { id: 'contrast', name: 'Contrast', icon: 'contrast', params: [{ name:'factor', label:'Factor', type:'range', min:0.1, max:3, step:0.05, default:1.0 }] },
+      { id: 'saturation', name: 'Saturation', icon: 'palette', params: [{ name:'factor', label:'Factor', type:'range', min:0, max:3, step:0.05, default:1.0 }] },
+    ]
+  },
+  filter: {
+    title: 'Filters',
+    ops: [
+      { id: 'blur', name: 'Gaussian Blur', icon: 'blur_on', params: [{ name:'radius', label:'Radius', type:'range', min:0.5, max:20, step:0.5, default:2 }] },
+      { id: 'sharpen', name: 'Sharpen', icon: 'shutter_speed', params: [{ name:'factor', label:'Factor', type:'range', min:1, max:10, step:0.5, default:2 }] },
+      { id: 'edge-detect', name: 'Edge Detection', icon: 'blur_linear', params: [] },
+      { id: 'emboss', name: 'Emboss', icon: 'texture', params: [] },
+      { id: 'pixelate', name: 'Pixelate', icon: 'grid_on', params: [{ name:'block_size', label:'Block Size', type:'range', min:2, max:50, step:1, default:10 }] },
+    ]
+  },
+  transform: {
+    title: 'Transform',
+    ops: [
+      { id: 'rotate', name: 'Rotate', icon: 'rotate_right', params: [{ name:'angle', label:'Angle (°)', type:'range', min:-360, max:360, step:1, default:90 }] },
+      { id: 'flip', name: 'Flip', icon: 'flip', params: [{ name:'direction', label:'Direction', type:'select', options:['horizontal','vertical'], default:'horizontal' }] },
+      { id: 'resize', name: 'Resize', icon: 'resize', params: [{ name:'width', label:'Width (px)', type:'number', default:800 }, { name:'height', label:'Height (px)', type:'number', default:600 }] },
+      { id: 'crop', name: 'Crop', icon: 'crop', params: [{ name:'left', label:'Left', type:'number', default:0 }, { name:'top', label:'Top', type:'number', default:0 }, { name:'right', label:'Right', type:'number', default:800 }, { name:'bottom', label:'Bottom', type:'number', default:600 }] },
+    ]
+  }
+};
+
+// ---- API STATUS ----
+async function checkAPI() {
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      setStatus(true);
+    } else { setStatus(false); }
+  } catch { setStatus(false); }
+}
+
+function setStatus(online) {
+  const dots = ['status-dot-landing','status-dot-editor'];
+  const texts = ['status-text-landing','status-text-editor'];
+  dots.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = `w-2 h-2 rounded-full ${online ? 'bg-emerald-500' : 'bg-error'}`;
+  });
+  texts.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = online ? 'API: Connected' : 'API: Offline';
+    el.style.color = online ? '#059669' : '#ba1a1a';
+  });
+}
+
+// ---- FILE HANDLING ----
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) loadImageFile(file);
+  e.target.value = '';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImageFile(file);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+
+function handleDragLeave() {
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+
+function loadImageFile(file) {
+  originalFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    originalDataUrl = e.target.result;
+    currentDataUrl = e.target.result;
+    historyStack = [{ label: 'Original', icon: 'image', dataUrl: e.target.result }];
+    document.getElementById('filename-display').textContent = file.name;
+    showEditor();
+    updateCanvas();
+    updateHistoryTray();
+    // Update crop defaults with actual image size
+    const img = new Image();
+    img.onload = () => {
+      updateDimensions(img.width, img.height);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateDimensions(w, h) {
+  document.getElementById('img-dimensions').textContent = `${w} × ${h}px`;
+  // Update crop defaults
+  const panel = PANELS.transform;
+  const cropOp = panel.ops.find(o => o.id === 'crop');
+  if (cropOp) {
+    cropOp.params.find(p => p.name === 'right').default = w;
+    cropOp.params.find(p => p.name === 'bottom').default = h;
+    const resizeOp = panel.ops.find(o => o.id === 'resize');
+    resizeOp.params.find(p => p.name === 'width').default = w;
+    resizeOp.params.find(p => p.name === 'height').default = h;
+  }
+}
+
+// ---- SCREEN SWITCHING ----
+function showEditor() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('editor').style.display = 'flex';
+  setPanel('filter');
+}
+
+function goToLanding() {
+  document.getElementById('editor').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+// ---- CANVAS UPDATE ----
+function updateCanvas() {
+  const img = document.getElementById('canvas-img');
+  img.src = currentDataUrl;
+  img.onload = () => {
+    document.getElementById('img-dimensions').textContent = `${img.naturalWidth} × ${img.naturalHeight}px`;
+    applyZoom();
+  };
+}
+
+function applyZoom() {
+  const wrapper = document.getElementById('image-wrapper');
+  const scale = currentZoom / 100;
+  wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.transformOrigin = 'center center';
+}
+
+function zoom(delta) {
+  currentZoom = Math.max(10, Math.min(400, currentZoom + delta));
+  document.getElementById('zoom-display').textContent = currentZoom + '%';
+  applyZoom();
+}
+
+// ---- PANEL RENDERING ----
+function setPanel(panelId) {
+  const panel = PANELS[panelId];
+  document.getElementById('panel-title').textContent = panel.title;
+
+  // Update tab buttons
+  ['color','adjust','filter','transform'].forEach(id => {
+    const btn = document.getElementById('btn-' + id + '-tab');
+    if (btn) btn.className = btn.className.replace(' active','') + (id === panelId ? ' active' : '');
+  });
+
+  // Update left rail tool buttons
+  document.querySelectorAll('.tool-rail-btn').forEach(b => {
+    b.className = b.className.replace('bg-primary-container text-on-primary-container','text-secondary hover:text-primary hover:bg-surface-container');
+  });
+  const railBtn = document.getElementById('tool-' + panelId);
+  if (railBtn) {
+    railBtn.className = railBtn.className.replace('text-secondary hover:text-primary hover:bg-surface-container', 'bg-primary-container text-on-primary-container');
+  }
+
+  selectedOp = null;
+  renderOps(panel.ops);
+}
+
+function renderOps(ops) {
+  const content = document.getElementById('panel-content');
+  content.innerHTML = '';
+
+  ops.forEach(op => {
+    const btn = document.createElement('div');
+    btn.className = 'op-btn flex items-center gap-2 p-2 rounded-lg border border-transparent cursor-pointer transition-all hover:bg-surface-container-low hover:border-outline-variant';
+    btn.dataset.opId = op.id;
+    btn.innerHTML = `
+      <div class="op-icon w-8 h-8 bg-surface-container rounded-lg flex items-center justify-center shrink-0 transition-all">
+        <span class="material-symbols-outlined text-[18px] text-secondary">${op.icon}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-ui-bold text-ui-bold text-on-surface">${op.name}</div>
+        ${op.params.length === 0 ? '<div class="text-[11px] text-secondary">One-click operation</div>' : '<div class="text-[11px] text-secondary">' + op.params.map(p=>p.label||p.name).join(', ') + '</div>'}
+      </div>
+      <span class="material-symbols-outlined text-[16px] text-outline-variant op-chevron">chevron_right</span>
+    `;
+    btn.addEventListener('click', () => selectOp(op, btn));
+    content.appendChild(btn);
+  });
+}
+
+function selectOp(op, btnEl) {
+  // Remove active from all
+  document.querySelectorAll('.op-btn').forEach(b => {
+    b.classList.remove('active');
+    b.querySelector('.op-icon')?.classList.remove('bg-primary/10');
+  });
+
+  btnEl.classList.add('active');
+  selectedOp = op;
+  currentParams = {};
+  op.params.forEach(p => { currentParams[p.name] = p.default; });
+
+  // Render params below
+  const existingParams = document.querySelectorAll('.param-section');
+  existingParams.forEach(el => el.remove());
+
+  if (op.params.length === 0) return;
+
+  const content = document.getElementById('panel-content');
+  const section = document.createElement('div');
+  section.className = 'param-section flex flex-col gap-4 mt-1 pt-3 border-t border-outline-variant';
+
+  op.params.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'flex flex-col gap-2';
+
+    if (p.type === 'range') {
+      row.innerHTML = `
+        <div class="flex justify-between items-center">
+          <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">${p.label}</label>
+          <input type="number" id="param-num-${p.name}" value="${p.default}" min="${p.min}" max="${p.max}" step="${p.step}"
+            class="w-16 h-6 px-1.5 border border-outline-variant rounded bg-surface-container-lowest font-numeric-input text-numeric-input text-right text-on-surface focus:outline-none focus:border-primary"
+            oninput="syncSlider('${p.name}', this.value)"/>
+        </div>
+        <div class="slider-track">
+          <input type="range" id="param-slider-${p.name}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.default}"
+            oninput="syncNumber('${p.name}', this.value)"/>
+        </div>`;
+    } else if (p.type === 'select') {
+      row.innerHTML = `
+        <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">${p.label}</label>
+        <div class="relative">
+          <select id="param-select-${p.name}" onchange="currentParams['${p.name}']=this.value"
+            class="w-full h-8 pl-2 pr-8 border border-outline-variant rounded bg-surface-container-lowest font-ui-medium text-ui-medium text-on-surface focus:outline-none focus:border-primary appearance-none cursor-pointer">
+            ${p.options.map(o => `<option value="${o}" ${o===p.default?'selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')}
+          </select>
+          <span class="material-symbols-outlined text-[16px] text-secondary absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+        </div>`;
+    } else if (p.type === 'number') {
+      row.innerHTML = `
+        <div class="flex justify-between items-center gap-2">
+          <label class="font-editor-label text-editor-label text-on-surface-variant uppercase shrink-0">${p.label}</label>
+          <input type="number" id="param-num-${p.name}" value="${p.default}"
+            class="w-24 h-6 px-1.5 border border-outline-variant rounded bg-surface-container-lowest font-numeric-input text-numeric-input text-right text-on-surface focus:outline-none focus:border-primary"
+            oninput="currentParams['${p.name}']=Number(this.value)"/>
+        </div>`;
+    }
+
+    section.appendChild(row);
+  });
+
+  content.appendChild(section);
+}
+
+function syncSlider(name, value) {
+  currentParams[name] = Number(value);
+  const slider = document.getElementById('param-slider-' + name);
+  if (slider) slider.value = value;
+}
+
+function syncNumber(name, value) {
+  currentParams[name] = Number(value);
+  const num = document.getElementById('param-num-' + name);
+  if (num) num.value = value;
+}
+
+function resetParams() {
+  if (!selectedOp) return;
+  selectedOp.params.forEach(p => {
+    currentParams[p.name] = p.default;
+    const slider = document.getElementById('param-slider-' + p.name);
+    if (slider) slider.value = p.default;
+    const num = document.getElementById('param-num-' + p.name);
+    if (num) num.value = p.default;
+  });
+}
+
+// ---- APPLY OPERATION ----
+async function applyOperation() {
+  if (!selectedOp) { showToast('Select an operation first', 'info'); return; }
+  if (!currentDataUrl) { showToast('No image loaded', 'warning'); return; }
+
+  // Check if API is needed or we can do a no-param instant apply
+  showProcessing(true);
+
+  try {
+    // Convert dataUrl to blob
+    const res = await fetch(currentDataUrl);
+    const blob = await res.blob();
+
+    const formData = new FormData();
+    formData.append('file', blob, 'image.png');
+
+    // Add params
+    for (const [k, v] of Object.entries(currentParams)) {
+      formData.append(k, v);
+    }
+
+    const apiRes = await fetch(`${API}/process/${selectedOp.id}`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!apiRes.ok) {
+      const err = await apiRes.json();
+      throw new Error(err.detail || 'API error');
+    }
+
+    const data = await apiRes.json();
+    const newDataUrl = 'data:image/png;base64,' + data.result;
+
+    currentDataUrl = newDataUrl;
+    historyStack.push({ label: selectedOp.name, icon: selectedOp.icon, dataUrl: newDataUrl });
+    updateCanvas();
+    updateHistoryTray();
+    showToast(`${selectedOp.name} applied`, 'check_circle');
+
+    // If compare mode, update compare ref
+    if (compareModeActive) {
+      document.getElementById('compare-img').src = historyStack[historyStack.length - 2]?.dataUrl || originalDataUrl;
+    }
+  } catch (e) {
+    showToast('Error: ' + (e.message === 'Failed to fetch' ? 'API not reachable — is the backend running?' : e.message), 'error');
+  } finally {
+    showProcessing(false);
+  }
+}
+
+function showProcessing(show) {
+  document.getElementById('processing-overlay').style.setProperty('display', show ? 'flex' : 'none', 'important');
+  document.getElementById('apply-btn').disabled = show;
+}
+
+// ---- HISTORY ----
+function updateHistoryTray() {
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  historyStack.forEach((item, i) => {
+    const isLast = i === historyStack.length - 1;
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-1';
+    div.innerHTML = `
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all ${isLast ? 'border-primary/20 bg-primary-container/10' : 'border-transparent hover:bg-surface-container-low'}" onclick="jumpHistory(${i})">
+        <span class="material-symbols-outlined text-[16px] ${isLast ? 'text-primary' : 'text-secondary'}">${item.icon}</span>
+        <span class="font-editor-label text-editor-label ${isLast ? 'text-primary' : 'text-secondary'}">${item.label}</span>
+      </div>
+      ${!isLast ? '<span class="material-symbols-outlined text-[16px] text-outline-variant">arrow_right_alt</span>' : ''}
+    `;
+    list.appendChild(div);
+  });
+  // Scroll to end
+  document.getElementById('history-tray').scrollLeft = 9999;
+}
+
+function jumpHistory(index) {
+  if (index >= historyStack.length) return;
+  historyStack = historyStack.slice(0, index + 1);
+  currentDataUrl = historyStack[historyStack.length - 1].dataUrl;
+  updateCanvas();
+  updateHistoryTray();
+  showToast('Jumped to: ' + historyStack[index].label, 'history');
+}
+
+function undoLast() {
+  if (historyStack.length <= 1) { showToast('Nothing to undo', 'info'); return; }
+  historyStack.pop();
+  currentDataUrl = historyStack[historyStack.length - 1].dataUrl;
+  updateCanvas();
+  updateHistoryTray();
+  showToast('Undone', 'undo');
+}
+
+function resetImage() {
+  currentDataUrl = originalDataUrl;
+  historyStack = [{ label: 'Original', icon: 'image', dataUrl: originalDataUrl }];
+  updateCanvas();
+  updateHistoryTray();
+  showToast('Image reset to original', 'restart_alt');
+}
+
+// ---- COMPARE MODE ----
+function toggleCompare() {
+  compareModeActive = !compareModeActive;
+  const overlay = document.getElementById('compare-overlay');
+  const handle = document.getElementById('compare-handle');
+  const label = document.getElementById('compare-label-after');
+  const btn = document.getElementById('compare-btn');
+
+  if (compareModeActive) {
+    if (historyStack.length < 2) {
+      showToast('Apply at least one operation to compare', 'info');
+      compareModeActive = false;
+      return;
+    }
+    overlay.style.display = 'block';
+    handle.style.display = 'block';
+    label.style.display = 'block';
+    btn.classList.add('text-primary');
+    btn.classList.remove('text-secondary');
+    // Show previous state as "before"
+    document.getElementById('compare-img').src = historyStack[0].dataUrl;
+    setComparePosition(50);
+  } else {
+    overlay.style.display = 'none';
+    handle.style.display = 'none';
+    label.style.display = 'none';
+    btn.classList.remove('text-primary');
+    btn.classList.add('text-secondary');
+  }
+}
+
+function setComparePosition(pct) {
+  const handle = document.getElementById('compare-handle');
+  const overlay = document.getElementById('compare-overlay');
+  handle.style.left = pct + '%';
+  overlay.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+}
+
+let dragging = false;
+function startCompareDrag(e) {
+  dragging = true;
+  e.preventDefault();
+  document.addEventListener('mousemove', onCompareDrag);
+  document.addEventListener('mouseup', () => { dragging = false; document.removeEventListener('mousemove', onCompareDrag); });
+}
+function onCompareDrag(e) {
+  if (!dragging) return;
+  const wrapper = document.getElementById('image-wrapper');
+  const rect = wrapper.getBoundingClientRect();
+  let pct = ((e.clientX - rect.left) / rect.width) * 100;
+  pct = Math.max(0, Math.min(100, pct));
+  setComparePosition(pct);
+}
+
+// ---- EXPORT ----
+function openExport() {
+  if (!currentDataUrl) return;
+  document.getElementById('export-modal').style.setProperty('display','flex','important');
+  const img = document.getElementById('canvas-img');
+  document.getElementById('export-size-info').textContent = `${img.naturalWidth} × ${img.naturalHeight}px`;
+  document.getElementById('export-ops-info').textContent = `${historyStack.length - 1} operation${historyStack.length !== 2 ? 's' : ''} applied`;
+  // default filename from original
+  if (originalFile) {
+    const base = originalFile.name.replace(/\.[^/.]+$/, '');
+    document.getElementById('export-filename').value = base + '-pixelforge';
+  }
+}
+
+function closeExport() {
+  document.getElementById('export-modal').style.setProperty('display','none','important');
+}
+
+function setFormat(fmt) {
+  exportFormat = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => {
+    b.className = b.className.replace(/border-primary bg-primary\/5 text-primary/g,'border-outline-variant text-secondary');
+  });
+  const active = document.getElementById('fmt-' + fmt);
+  active.className = active.className.replace('border-outline-variant text-secondary','border-primary bg-primary/5 text-primary');
+  const qualitySection = document.getElementById('quality-section');
+  if (fmt === 'jpeg' || fmt === 'webp') {
+    qualitySection.style.setProperty('display','flex','important');
+  } else {
+    qualitySection.style.setProperty('display','none','important');
+  }
+}
+
+function downloadImage() {
+  const filename = document.getElementById('export-filename').value || 'pixelforge-export';
+  const canvas = document.createElement('canvas');
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    let mimeType = 'image/png';
+    let ext = 'png';
+    let quality = 1;
+    if (exportFormat === 'jpeg') { mimeType = 'image/jpeg'; ext = 'jpg'; quality = Number(document.getElementById('quality-val').value) / 100; }
+    if (exportFormat === 'webp') { mimeType = 'image/webp'; ext = 'webp'; quality = Number(document.getElementById('quality-val').value) / 100; }
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename + '.' + ext;
+      a.click();
+      URL.revokeObjectURL(url);
+      closeExport();
+      showToast('Downloaded as ' + filename + '.' + ext, 'download');
+    }, mimeType, quality);
+  };
+  img.src = currentDataUrl;
+}
+
+// ---- TOAST ----
+function showToast(msg, icon = 'info') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  toast.style.opacity = '1';
+  toast.style.pointerEvents = 'auto';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.pointerEvents = 'none';
+  }, 3000);
+}
+
+// ---- INIT ----
+checkAPI();
+setInterval(checkAPI, 30000);
+</script>
+</body>
+</html>
