@@ -113,7 +113,7 @@ tailwind.config = {
   .tab-btn.active { background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
 </style>
 </head>
-<body class="bg-background text-on-background h-screen overflow-hidden flex flex-col font-ui-medium text-ui-medium selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-background text-on-background h-[100dvh] overflow-hidden flex flex-col font-ui-medium text-ui-medium selection:bg-primary-container selection:text-on-primary-container">
 
 <div id="toast" class="toast opacity-0 pointer-events-none">
   <div class="bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-xl text-ui-medium shadow-lg flex items-center gap-2">
@@ -215,8 +215,8 @@ tailwind.config = {
     </div>
   </header>
 
-  <div class="flex flex-col md:flex-row flex-1 overflow-hidden" style="height:calc(100vh - 48px - 60px)">
-    <aside class="bg-surface-container-lowest border-b md:border-b-0 md:border-r border-outline-variant flex flex-row md:flex-col items-center p-2 md:py-3 gap-element-gap z-40 shrink-0 w-full md:w-[48px] overflow-x-auto no-scrollbar">
+<div class="flex flex-col md:flex-row flex-1 overflow-y-auto overflow-x-hidden md:overflow-hidden" style="height:calc(100dvh - 48px - 60px)">
+      <aside class="bg-surface-container-lowest border-b md:border-b-0 md:border-r border-outline-variant flex flex-row md:flex-col items-center p-2 md:py-3 gap-element-gap z-40 shrink-0 w-full md:w-[48px] overflow-x-auto no-scrollbar">
       <button onclick="setPanel('color')" id="tool-color" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-all" title="Color">
         <span class="material-symbols-outlined text-[20px]">palette</span>
       </button>
@@ -239,8 +239,8 @@ tailwind.config = {
       </div>
     </aside>
 
-    <main class="flex-1 bg-canvas-dark relative flex flex-col overflow-hidden">
-      <div class="flex-1 p-4 md:p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
+<main class="flex-1 bg-canvas-dark relative flex flex-col overflow-hidden min-h-[45dvh] md:min-h-0">
+        <div class="flex-1 p-4 md:p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
         <div id="processing-overlay" class="absolute inset-0 bg-canvas-dark/70 z-10 flex items-center justify-center" style="display:none!important">
           <div class="bg-surface-container-lowest rounded-xl px-6 py-4 flex items-center gap-3 shadow-xl border border-outline-variant">
             <svg class="loading-spinner w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24">
@@ -253,7 +253,7 @@ tailwind.config = {
 
         <!-- Removed max-height from the wrapper and added m-auto to center it perfectly -->
 <div id="image-wrapper" class="relative w-full shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20 m-auto" style="max-width: 800px;">
-  <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height: 75vh; object-fit: contain;"/>
+<img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height: 75dvh; object-fit: contain;"/>
           <div id="compare-overlay" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path:inset(0 50% 0 0);display:none">
             <img id="compare-img" src="" alt="Original" class="w-full h-full object-contain"/>
             <div class="absolute top-2 left-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase">Before</div>
@@ -267,8 +267,8 @@ tailwind.config = {
         </div>
       </div>
 
-      <div class="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-3 py-1.5 md:px-4 md:py-2 flex items-center gap-3 md:gap-4 shadow-lg z-10 scale-90 sm:scale-100 origin-bottom whitespace-nowrap">
-        <div class="flex items-center gap-1 md:gap-2 text-secondary">
+<div class="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-3 py-1.5 md:px-4 md:py-2 flex items-center gap-2 md:gap-4 shadow-lg z-10 w-[95%] max-w-max overflow-x-auto no-scrollbar whitespace-nowrap">
+          <div class="flex items-center gap-1 md:gap-2 text-secondary">
           <button onclick="zoom(-10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">remove</span></button>
           <span id="zoom-display" class="font-numeric-input text-numeric-input text-on-surface w-10 md:w-12 text-center">100%</span>
           <button onclick="zoom(10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">add</span></button>
