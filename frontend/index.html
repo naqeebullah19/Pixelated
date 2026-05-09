@@ -2,7 +2,7 @@
 <html lang="en" class="light">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Pixelated Digital Image Studio</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -88,6 +88,8 @@ tailwind.config = {
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:#c8c4d5; border-radius:4px; }
   ::-webkit-scrollbar-thumb:hover { background:#777584; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   .slider-track { position:relative; height:24px; display:flex; align-items:center; cursor:pointer; }
   .slider-track input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:2px; background:transparent; outline:none; cursor:pointer; position:relative; z-index:2; }
   .slider-track input[type=range]::-webkit-slider-runnable-track { height:2px; background:#e4e1eb; border-radius:2px; }
@@ -122,27 +124,27 @@ tailwind.config = {
 
 <div id="landing" class="flex-col h-full w-full">
   <nav class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
-    <div class="flex items-center gap-3">
-      <span class="font-bold text-[15px] text-primary font-heading-sm">Pixelated</span>
-      <span class="text-outline-variant">|</span>
-      <span class="text-secondary text-ui-medium">Digital Image Studio</span>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <span class="font-bold text-[14px] sm:text-[15px] text-primary font-heading-sm">Pixelated</span>
+      <span class="text-outline-variant hidden sm:inline">|</span>
+      <span class="text-secondary text-ui-medium hidden sm:inline">Digital Image Studio</span>
     </div>
     <div class="flex items-center gap-2">
       <div id="api-status-landing" class="flex items-center gap-1.5 text-secondary text-ui-medium">
         <div id="status-dot-landing" class="w-2 h-2 rounded-full bg-outline-variant"></div>
-        <span id="status-text-landing" class="font-numeric-input text-[11px]">Checking API...</span>
+        <span id="status-text-landing" class="font-numeric-input text-[11px] hidden sm:inline">Checking API...</span>
       </div>
       <div class="h-4 w-px bg-outline-variant mx-1"></div>
-      <button onclick="document.getElementById('file-input').click()" class="bg-primary text-on-primary font-ui-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity text-ui-medium flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[16px]">upload</span> Open Image
+      <button onclick="document.getElementById('file-input').click()" class="bg-primary text-on-primary font-ui-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity text-[12px] sm:text-ui-medium flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">upload</span> <span class="hidden sm:inline">Open Image</span>
       </button>
     </div>
   </nav>
 
-  <div class="flex-1 flex items-center justify-center bg-surface-container-low" style="height:calc(100vh - 48px)">
-    <div class="flex flex-col items-center gap-8 w-full max-w-2xl px-6">
+  <div class="flex-1 flex items-center justify-center bg-surface-container-low overflow-y-auto p-4 sm:p-0" style="height:calc(100vh - 48px)">
+    <div class="flex flex-col items-center gap-6 sm:gap-8 w-full max-w-2xl sm:px-6">
       <div id="drop-zone"
-        class="w-full border-2 border-dashed border-outline-variant rounded-xl p-16 flex flex-col items-center gap-4 cursor-pointer transition-all hover:border-primary hover:bg-surface-container"
+        class="w-full border-2 border-dashed border-outline-variant rounded-xl p-8 sm:p-16 flex flex-col items-center gap-4 cursor-pointer transition-all hover:border-primary hover:bg-surface-container text-center"
         onclick="document.getElementById('file-input').click()"
         ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
         <div class="w-16 h-16 bg-surface-container rounded-xl flex items-center justify-center border border-outline-variant">
@@ -150,7 +152,7 @@ tailwind.config = {
         </div>
         <div class="text-center">
           <p class="font-bold text-[15px] text-on-surface font-heading-sm">Drop an image here</p>
-          <p class="text-secondary text-ui-medium mt-1">or click to browse — PNG, JPG, WEBP, GIF supported</p>
+          <p class="text-secondary text-ui-medium mt-1 text-[12px] sm:text-[13px]">or click to browse — PNG, JPG, WEBP, GIF supported</p>
         </div>
         <button class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-4 py-2 rounded hover:bg-surface-container-low transition-colors flex items-center gap-2">
           <span class="material-symbols-outlined text-[16px]">folder_open</span> Browse Files
@@ -159,7 +161,7 @@ tailwind.config = {
 
       <div class="w-full">
         <p class="font-editor-label text-editor-label text-on-surface-variant uppercase mb-3">Available Operations</p>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex flex-col gap-1">
             <span class="material-symbols-outlined text-[18px] text-primary">palette</span>
             <span class="font-ui-bold text-ui-bold text-on-surface">Color</span>
@@ -187,47 +189,47 @@ tailwind.config = {
 </div>
 
 <div id="editor" class="flex-col h-full w-full">
-  <header class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-4 h-[48px] z-50 shrink-0">
-    <div class="flex items-center gap-4">
-      <button onclick="goToLanding()" class="font-bold text-[15px] text-primary font-heading-sm hover:opacity-70 transition-opacity">PixelForge</button>
-      <div class="h-4 w-px bg-outline-variant"></div>
-      <div class="flex items-center gap-1.5 text-secondary text-ui-medium">
-        <span class="material-symbols-outlined text-[14px]">image</span>
-        <span id="filename-display">Untitled</span>
+  <header class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-2 sm:px-4 h-[48px] z-50 shrink-0">
+    <div class="flex items-center gap-2 sm:gap-4 overflow-hidden">
+      <button onclick="goToLanding()" class="font-bold text-[14px] sm:text-[15px] text-primary font-heading-sm hover:opacity-70 transition-opacity truncate">PixelForge</button>
+      <div class="h-4 w-px bg-outline-variant shrink-0"></div>
+      <div class="flex items-center gap-1.5 text-secondary text-ui-medium overflow-hidden">
+        <span class="material-symbols-outlined text-[14px] shrink-0">image</span>
+        <span id="filename-display" class="truncate max-w-[80px] sm:max-w-[150px]">Untitled</span>
       </div>
-      <div class="flex items-center gap-1.5 text-secondary text-ui-medium">
+      <div class="hidden sm:flex items-center gap-1.5 text-secondary text-ui-medium shrink-0">
         <div id="status-dot-editor" class="w-2 h-2 rounded-full bg-outline-variant"></div>
         <span id="status-text-editor" class="font-numeric-input text-[11px]">API: Checking...</span>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button onclick="undoLast()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-3 py-1 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5" title="Undo last operation">
-        <span class="material-symbols-outlined text-[16px]">undo</span> Undo
+    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+      <button onclick="undoLast()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-2 py-1 sm:px-3 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5" title="Undo last operation">
+        <span class="material-symbols-outlined text-[16px]">undo</span> <span class="hidden md:inline">Undo</span>
       </button>
-      <button onclick="resetImage()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-3 py-1 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
+      <button onclick="resetImage()" class="bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium px-2 py-1 sm:px-3 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5" title="Reset to original">
+        <span class="material-symbols-outlined text-[16px]">restart_alt</span> <span class="hidden md:inline">Reset</span>
       </button>
-      <button onclick="openExport()" class="bg-primary text-on-primary font-ui-medium px-3 py-1 rounded hover:opacity-90 transition-opacity flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[16px]">download</span> Export
+      <button onclick="openExport()" class="bg-primary text-on-primary font-ui-medium px-2 py-1 sm:px-3 rounded hover:opacity-90 transition-opacity flex items-center gap-1.5" title="Export image">
+        <span class="material-symbols-outlined text-[16px]">download</span> <span class="hidden md:inline">Export</span>
       </button>
     </div>
   </header>
 
-  <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 48px - 60px)">
-    <aside class="bg-surface-container-lowest border-r border-outline-variant flex flex-col items-center py-3 gap-element-gap z-40 shrink-0 w-[48px]">
-      <button onclick="setPanel('color')" id="tool-color" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Color">
+  <div class="flex flex-col md:flex-row flex-1 overflow-hidden" style="height:calc(100vh - 48px - 60px)">
+    <aside class="bg-surface-container-lowest border-b md:border-b-0 md:border-r border-outline-variant flex flex-row md:flex-col items-center p-2 md:py-3 gap-element-gap z-40 shrink-0 w-full md:w-[48px] overflow-x-auto no-scrollbar">
+      <button onclick="setPanel('color')" id="tool-color" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-all" title="Color">
         <span class="material-symbols-outlined text-[20px]">palette</span>
       </button>
-      <button onclick="setPanel('adjust')" id="tool-adjust" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Adjustments">
+      <button onclick="setPanel('adjust')" id="tool-adjust" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-all" title="Adjustments">
         <span class="material-symbols-outlined text-[20px]">tune</span>
       </button>
-      <button onclick="setPanel('filter')" id="tool-filter" class="tool-rail-btn bg-primary-container text-on-primary-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Filters">
+      <button onclick="setPanel('filter')" id="tool-filter" class="tool-rail-btn bg-primary-container text-on-primary-container w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-all" title="Filters">
         <span class="material-symbols-outlined text-[20px]">filter_vintage</span>
       </button>
-      <button onclick="setPanel('transform')" id="tool-transform" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Transform">
+      <button onclick="setPanel('transform')" id="tool-transform" class="tool-rail-btn text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 shrink-0 rounded-lg flex items-center justify-center transition-all" title="Transform">
         <span class="material-symbols-outlined text-[20px]">crop_free</span>
       </button>
-      <div class="mt-auto flex flex-col gap-element-gap">
+      <div class="ml-auto md:ml-0 md:mt-auto flex flex-row md:flex-col gap-element-gap shrink-0">
         <button onclick="toggleCompare()" class="text-secondary hover:text-primary hover:bg-surface-container w-10 h-10 rounded-lg flex items-center justify-center transition-all" title="Compare Before/After">
           <span class="material-symbols-outlined text-[20px]">compare</span>
         </button>
@@ -238,7 +240,7 @@ tailwind.config = {
     </aside>
 
     <main class="flex-1 bg-canvas-dark relative flex flex-col overflow-hidden">
-      <div class="flex-1 p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
+      <div class="flex-1 p-4 md:p-8 flex items-center justify-center relative overflow-auto" id="canvas-container">
         <div id="processing-overlay" class="absolute inset-0 bg-canvas-dark/70 z-10 flex items-center justify-center" style="display:none!important">
           <div class="bg-surface-container-lowest rounded-xl px-6 py-4 flex items-center gap-3 shadow-xl border border-outline-variant">
             <svg class="loading-spinner w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24">
@@ -249,14 +251,14 @@ tailwind.config = {
           </div>
         </div>
 
-        <div id="image-wrapper" class="relative max-w-4xl max-h-full shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20" style="max-width:min(800px,100%);max-height:calc(100vh - 200px)">
+        <div id="image-wrapper" class="relative max-w-4xl shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20" style="max-width:min(800px,100%);max-height:100%">
           <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height:calc(100vh - 200px);object-fit:contain"/>
           <div id="compare-overlay" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path:inset(0 50% 0 0);display:none">
             <img id="compare-img" src="" alt="Original" class="w-full h-full object-contain"/>
             <div class="absolute top-2 left-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase">Before</div>
           </div>
           <div id="compare-label-after" class="absolute top-2 right-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase" style="display:none">After</div>
-          <div id="compare-handle" class="compare-slider" style="left:50%;display:none" onmousedown="startCompareDrag(event)">
+          <div id="compare-handle" class="compare-slider" style="left:50%;display:none" onmousedown="startCompareDrag(event)" ontouchstart="startCompareDrag(event)">
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-primary rounded-full flex items-center justify-center shadow-lg pointer-events-none">
               <span class="material-symbols-outlined text-white text-[14px]">drag_indicator</span>
             </div>
@@ -264,36 +266,36 @@ tailwind.config = {
         </div>
       </div>
 
-      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-4 py-2 flex items-center gap-4 shadow-lg z-10">
-        <div class="flex items-center gap-2 text-secondary">
+      <div class="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest/90 backdrop-blur border border-outline-variant rounded-full px-3 py-1.5 md:px-4 md:py-2 flex items-center gap-3 md:gap-4 shadow-lg z-10 scale-90 sm:scale-100 origin-bottom whitespace-nowrap">
+        <div class="flex items-center gap-1 md:gap-2 text-secondary">
           <button onclick="zoom(-10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">remove</span></button>
-          <span id="zoom-display" class="font-numeric-input text-numeric-input text-on-surface w-12 text-center">100%</span>
+          <span id="zoom-display" class="font-numeric-input text-numeric-input text-on-surface w-10 md:w-12 text-center">100%</span>
           <button onclick="zoom(10)" class="hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[18px]">add</span></button>
         </div>
         <div class="w-px h-4 bg-outline-variant"></div>
-        <button onclick="toggleCompare()" id="compare-btn" class="flex items-center gap-2 text-secondary hover:text-primary transition-colors font-ui-bold text-ui-bold">
-          <span class="material-symbols-outlined text-[18px]">compare</span> Before / After
+        <button onclick="toggleCompare()" id="compare-btn" class="flex items-center gap-1.5 md:gap-2 text-secondary hover:text-primary transition-colors font-ui-bold text-ui-bold">
+          <span class="material-symbols-outlined text-[18px]">compare</span> <span class="hidden sm:inline">Before / After</span><span class="sm:hidden">Compare</span>
         </button>
         <div class="w-px h-4 bg-outline-variant"></div>
-        <span id="img-dimensions" class="font-numeric-input text-[11px] text-secondary">--</span>
+        <span id="img-dimensions" class="font-numeric-input text-[10px] md:text-[11px] text-secondary">--</span>
       </div>
     </main>
 
-    <aside id="right-panel" class="bg-surface-container-lowest border-l border-outline-variant flex flex-col shrink-0 w-[280px] h-full overflow-hidden">
-      <div class="px-3 py-3 border-b border-outline-variant flex justify-between items-center bg-surface-bright shrink-0">
-        <span id="panel-title" class="font-ui-bold text-ui-bold text-on-surface">Filters</span>
-        <div class="flex gap-1">
-          <button id="btn-color-tab" onclick="setPanel('color')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Color</button>
-          <button id="btn-adjust-tab" onclick="setPanel('adjust')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Adjust</button>
-          <button id="btn-filter-tab" onclick="setPanel('filter')" class="tab-btn active px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Filter</button>
-          <button id="btn-transform-tab" onclick="setPanel('transform')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors">Transform</button>
+    <aside id="right-panel" class="bg-surface-container-lowest border-t md:border-t-0 md:border-l border-outline-variant flex flex-col shrink-0 w-full md:w-[280px] h-[260px] sm:h-[300px] md:h-full overflow-hidden">
+      <div class="px-3 py-2 md:py-3 border-b border-outline-variant flex justify-between items-center bg-surface-bright shrink-0">
+        <span id="panel-title" class="font-ui-bold text-ui-bold text-on-surface hidden sm:inline">Filters</span>
+        <div class="flex gap-1 overflow-x-auto no-scrollbar w-full sm:w-auto justify-between sm:justify-start">
+          <button id="btn-color-tab" onclick="setPanel('color')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors whitespace-nowrap">Color</button>
+          <button id="btn-adjust-tab" onclick="setPanel('adjust')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors whitespace-nowrap">Adjust</button>
+          <button id="btn-filter-tab" onclick="setPanel('filter')" class="tab-btn active px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors whitespace-nowrap">Filter</button>
+          <button id="btn-transform-tab" onclick="setPanel('transform')" class="tab-btn px-2 py-1 rounded text-[11px] font-editor-label text-secondary hover:text-on-surface transition-colors whitespace-nowrap">Transform</button>
         </div>
       </div>
 
-      <div id="panel-content" class="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
+      <div id="panel-content" class="flex-1 overflow-y-auto p-3 flex flex-col gap-3 md:gap-4 pb-20 md:pb-3">
         </div>
 
-      <div class="p-3 border-t border-outline-variant bg-surface-bright flex gap-2 shrink-0">
+      <div class="p-2 md:p-3 border-t border-outline-variant bg-surface-bright flex gap-2 shrink-0">
         <button onclick="resetParams()" class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium py-1.5 rounded hover:bg-surface-container-low transition-colors text-center text-ui-medium">Reset</button>
         <button onclick="applyOperation()" id="apply-btn" class="flex-1 bg-primary text-on-primary font-ui-medium py-1.5 rounded hover:opacity-90 transition-opacity text-center text-ui-medium flex items-center justify-center gap-1.5">
           <span class="material-symbols-outlined text-[14px]">check</span> Apply
@@ -302,7 +304,7 @@ tailwind.config = {
     </aside>
   </div>
 
-  <div class="h-[60px] bg-surface-container-lowest border-t border-outline-variant shrink-0 flex items-center px-4 overflow-x-auto gap-1" id="history-tray">
+  <div class="h-[60px] bg-surface-container-lowest border-t border-outline-variant shrink-0 flex items-center px-4 overflow-x-auto gap-1 no-scrollbar" id="history-tray">
     <div class="flex items-center gap-1 min-w-max" id="history-list">
       <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary-container/10">
         <span class="material-symbols-outlined text-[16px] text-primary">image</span>
@@ -312,21 +314,21 @@ tailwind.config = {
   </div>
 </div>
 
-<div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm" style="display:none!important">
-  <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-[480px] max-w-full mx-4 overflow-hidden">
-    <div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center">
+<div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm p-4" style="display:none!important">
+  <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-2xl w-[480px] max-w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center shrink-0">
       <span class="font-ui-bold text-ui-bold text-on-surface font-heading-sm">Export Image</span>
       <button onclick="closeExport()" class="text-secondary hover:text-on-surface p-1 rounded hover:bg-surface-container-low transition-colors">
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
-    <div class="p-4 flex flex-col gap-4">
+    <div class="p-4 flex flex-col gap-4 overflow-y-auto">
       <div class="flex flex-col gap-2">
         <label class="font-editor-label text-editor-label text-on-surface-variant uppercase">Format</label>
         <div class="flex gap-2">
-          <button onclick="setFormat('png')" id="fmt-png" class="fmt-btn flex-1 border border-primary bg-primary/5 text-primary font-ui-bold py-2 rounded text-ui-bold transition-all">PNG</button>
-          <button onclick="setFormat('jpeg')" id="fmt-jpeg" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-ui-medium transition-all hover:border-primary hover:text-primary">JPEG</button>
-          <button onclick="setFormat('webp')" id="fmt-webp" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-ui-medium transition-all hover:border-primary hover:text-primary">WEBP</button>
+          <button onclick="setFormat('png')" id="fmt-png" class="fmt-btn flex-1 border border-primary bg-primary/5 text-primary font-ui-bold py-2 rounded text-[12px] sm:text-ui-bold transition-all">PNG</button>
+          <button onclick="setFormat('jpeg')" id="fmt-jpeg" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-[12px] sm:text-ui-medium transition-all hover:border-primary hover:text-primary">JPEG</button>
+          <button onclick="setFormat('webp')" id="fmt-webp" class="fmt-btn flex-1 border border-outline-variant text-secondary font-ui-medium py-2 rounded text-[12px] sm:text-ui-medium transition-all hover:border-primary hover:text-primary">WEBP</button>
         </div>
       </div>
       <div id="quality-section" class="flex flex-col gap-2" style="display:none!important">
@@ -348,7 +350,7 @@ tailwind.config = {
         </div>
       </div>
     </div>
-    <div class="px-4 pb-4 flex gap-2">
+    <div class="px-4 pb-4 pt-2 flex gap-2 shrink-0">
       <button onclick="closeExport()" class="flex-1 bg-surface-container-lowest border border-outline-variant text-on-surface font-ui-medium py-2 rounded hover:bg-surface-container-low transition-colors">Cancel</button>
       <button onclick="downloadImage()" class="flex-1 bg-primary text-on-primary font-ui-medium py-2 rounded hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-[16px]">download</span> Download
@@ -570,7 +572,7 @@ function renderOps(ops) {
       </div>
       <div class="flex-1 min-w-0">
         <div class="font-ui-bold text-ui-bold text-on-surface">${op.name}</div>
-        ${op.params.length === 0 ? '<div class="text-[11px] text-secondary">One-click operation</div>' : '<div class="text-[11px] text-secondary">' + op.params.map(p=>p.label||p.name).join(', ') + '</div>'}
+        ${op.params.length === 0 ? '<div class="text-[11px] text-secondary">One-click operation</div>' : '<div class="text-[11px] text-secondary truncate">' + op.params.map(p=>p.label||p.name).join(', ') + '</div>'}
       </div>
       <span class="material-symbols-outlined text-[16px] text-outline-variant op-chevron">chevron_right</span>
     `;
@@ -641,6 +643,8 @@ function selectOp(op, btnEl) {
   });
 
   content.appendChild(section);
+  // Auto-scroll to show params on small screens
+  section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function syncSlider(name, value) {
@@ -812,13 +816,26 @@ function startCompareDrag(e) {
   dragging = true;
   e.preventDefault();
   document.addEventListener('mousemove', onCompareDrag);
-  document.addEventListener('mouseup', () => { dragging = false; document.removeEventListener('mousemove', onCompareDrag); });
+  document.addEventListener('touchmove', onCompareDrag, { passive: false });
+  document.addEventListener('mouseup', endCompareDrag);
+  document.addEventListener('touchend', endCompareDrag);
 }
+
+function endCompareDrag() {
+  dragging = false;
+  document.removeEventListener('mousemove', onCompareDrag);
+  document.removeEventListener('touchmove', onCompareDrag);
+  document.removeEventListener('mouseup', endCompareDrag);
+  document.removeEventListener('touchend', endCompareDrag);
+}
+
 function onCompareDrag(e) {
   if (!dragging) return;
+  e.preventDefault(); // Prevent scrolling while dragging
+  const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
   const wrapper = document.getElementById('image-wrapper');
   const rect = wrapper.getBoundingClientRect();
-  let pct = ((e.clientX - rect.left) / rect.width) * 100;
+  let pct = ((clientX - rect.left) / rect.width) * 100;
   pct = Math.max(0, Math.min(100, pct));
   setComparePosition(pct);
 }
