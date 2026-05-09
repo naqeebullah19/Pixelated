@@ -251,8 +251,9 @@ tailwind.config = {
           </div>
         </div>
 
-        <div id="image-wrapper" class="relative max-w-4xl shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20" style="max-width:min(800px,100%);max-height:100%">
-          <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height:calc(100vh - 200px);object-fit:contain"/>
+        <!-- Removed max-height from the wrapper and added m-auto to center it perfectly -->
+<div id="image-wrapper" class="relative w-full shadow-2xl rounded-sm overflow-hidden checkerboard border border-outline/20 m-auto" style="max-width: 800px;">
+  <img id="canvas-img" src="" alt="Editing canvas" class="block w-full h-auto" style="max-height: 75vh; object-fit: contain;"/>
           <div id="compare-overlay" class="absolute inset-0 overflow-hidden pointer-events-none" style="clip-path:inset(0 50% 0 0);display:none">
             <img id="compare-img" src="" alt="Original" class="w-full h-full object-contain"/>
             <div class="absolute top-2 left-2 bg-surface-container-lowest/80 rounded px-2 py-1 text-[10px] font-editor-label text-on-surface-variant uppercase">Before</div>
